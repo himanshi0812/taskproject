@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 require ('../db/conn');
 const User = require('../models/userSchema');
+const bcrypt = require('bcrypt');
 
 router.get('/',(req,res) => {
     res.send('auth.js')
@@ -50,13 +51,16 @@ router.post('/signin',async (req,res) => {
         }
 
         const userLogin = await User.findOne({email:email});
-        console.log(userLogin);
-
-        if(!userLogin){
+        // console.log(userLogin);
+        if(userLogin){
+        const isMatch = await bcrypt.compare(password , userLogin.password);
+        if(!isMatch){
             res.json({erro:"user error"})
-        }
-        else{
+        }else{
             res.json({message:"login success"})
+        }}
+        else{
+            res.json({erro:"user error"})
         }
 }
     catch (err){
