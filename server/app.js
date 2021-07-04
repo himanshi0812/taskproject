@@ -21,19 +21,20 @@ const middleware = (req,res,next) =>{
 }
 middleware();
 
-app.get('/' , (req,res) => {
+app.get('/home' , (req,res) => {
+    res.cookie("test",'new');
     res.send ("hello i am server")
 });
 
-app.get('/login' , middleware, (req,res) => {
-    res.send ("hello i am login")
-});
+// app.get('/login' , (req,res) => {
+//     res.send ("hello i am login")
+// });
 
-app.get('/register' , (req,res) => {
-    res.send ("hello i am register")
-});
+// app.get('/register',(req,res) => {
+//     res.send ("hello i am register")
+// });
 
-app.listen(3000 ,() =>{ 
+app.listen(5000 ,() =>{ 
     console.log('server');
 } )
 
