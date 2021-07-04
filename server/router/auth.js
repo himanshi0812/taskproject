@@ -3,18 +3,20 @@ const router = express.Router();
 require ('../db/conn');
 const User = require('../models/userSchema');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const authenticate = require('../middleware/authenticate');
 
 router.get('/',(req,res) => {
     res.send('auth.js')
 });
 
-router.post('/signup',async (req,res) => {
-    // console.log(req.body);
+router.post('/register',async (req,res) => {
+    console.log(req.body);
     // res.json({message:req.body});
     const { name, email, password, cpassword, address} = req.body;
 
     if( !name|| !email|| !password|| !cpassword|| !address){
-        return res.status(420).json({error : 'please filled all field'});
+        return res.status(422).json({error : 'please filled all field'});
     }
 
     try {
@@ -24,7 +26,7 @@ router.post('/signup',async (req,res) => {
         if(userExist){
             return res.status(422).json({error:"email already exist"});
         }else if (password!= cpassword){
-            return res.json ({error : "password not matched"})
+            return res.status(422).json ({error : "password not matched"})
         }else {
 
         const user = new User({  name, email, password, cpassword, address });
@@ -42,7 +44,9 @@ router.post('/signup',async (req,res) => {
 router.post('/signin',async (req,res) => {
     // console.log(req.body);
     // res.json({message:"aawwwww"});
+    // let token;
     try{
+    
         const {email, password } = req.body;
         
         if(!email || !password)
@@ -54,13 +58,21 @@ router.post('/signin',async (req,res) => {
         // console.log(userLogin);
         if(userLogin){
         const isMatch = await bcrypt.compare(password , userLogin.password);
+
+        const token = await userLogin.generateAuthToken();
+        console.log(token);
+        res.cookie("jwtoken",token, {
+            expires : new Date(Date.now() +25892000000),
+            httpOnly: true
+
+        })
         if(!isMatch){
-            res.json({erro:"user error"})
+            res.status(400).json({erro:"user error"})
         }else{
             res.json({message:"login success"})
         }}
         else{
-            res.json({erro:"user error"})
+            res.status(400).json({erro:"user error"})
         }
 }
     catch (err){
@@ -68,4 +80,9 @@ router.post('/signin',async (req,res) => {
 
     }
 });
+
+// home page
+router.get('/home' , authenticate,(req,res) => {
+    console.log('sdxvcb');
+})
 module.exports = router;
